@@ -1,3 +1,5 @@
+![Northbound](docs/images/northbound-banner.png)
+
 # Claude Code Demystified: Examples
 
 The companion code for the ebook *Claude Code Demystified*. Everything
