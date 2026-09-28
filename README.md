@@ -1,4 +1,6 @@
-![Northbound](docs/images/northbound-banner.png)
+<p align="center">
+  <img src="docs/images/claude-code-demystified-cover.png" alt="Cover of Claude Code Demystified: Your First 30 Days With Claude Code, by Dan Castro" width="320">
+</p>
 
 # Claude Code Demystified: Examples
 
