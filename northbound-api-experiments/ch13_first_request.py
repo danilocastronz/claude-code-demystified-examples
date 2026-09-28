@@ -6,7 +6,7 @@ load_dotenv()
 client = Anthropic()
 
 message = client.messages.create(
-    model="claude-sonnet-5",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     system=(
         "You are a support assistant for Northbound, a shipment "

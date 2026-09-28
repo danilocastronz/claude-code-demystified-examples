@@ -31,7 +31,7 @@ right away and get back to you with an update.</reply>
 """
 
 message = client.messages.create(
-    model="claude-sonnet-5",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     system=system_prompt,
     messages=[

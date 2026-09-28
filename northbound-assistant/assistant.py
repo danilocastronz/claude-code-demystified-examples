@@ -86,7 +86,7 @@ def handle_ticket(customer_message: str) -> dict:
     ]
 
     response = client.messages.create(
-        model="claude-sonnet-5",
+        model="claude-sonnet-5-5",
         max_tokens=1024,
         system=SYSTEM_PROMPT,
         tools=TOOLS,
@@ -118,7 +118,7 @@ def handle_ticket(customer_message: str) -> dict:
         )
 
         response = client.messages.create(
-            model="claude-sonnet-5",
+            model="claude-sonnet-5-5",
             max_tokens=1024,
             system=SYSTEM_PROMPT,
             tools=TOOLS,

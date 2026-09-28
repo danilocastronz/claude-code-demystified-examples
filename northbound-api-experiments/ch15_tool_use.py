@@ -50,7 +50,7 @@ messages = [
 ]
 
 response = client.messages.create(
-    model="claude-sonnet-5",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     tools=tools,
     messages=messages,
@@ -81,7 +81,7 @@ while response.stop_reason == "tool_use":
     )
 
     response = client.messages.create(
-        model="claude-sonnet-5",
+        model="claude-sonnet-5-5",
         max_tokens=1024,
         tools=tools,
         messages=messages,
