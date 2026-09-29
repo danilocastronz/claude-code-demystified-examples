@@ -1,6 +1,6 @@
 {
   "name": "northbound-toolkit",
-  "description": "Shared Claude Code setup for the Northbound project",
+  "description": "Shared Claude Code setup for Northbound",
   "version": "1.0.0",
   "author": {
     "name": "Dan Castro"

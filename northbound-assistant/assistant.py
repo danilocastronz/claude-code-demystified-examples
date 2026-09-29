@@ -21,7 +21,9 @@ TOOLS = [
             "properties": {
                 "shipment_id": {
                     "type": "string",
-                    "description": "The Northbound shipment ID, e.g. NB-10234",
+                    "description": (
+                        "The Northbound shipment ID, e.g. NB-10234"
+                    ),
                 }
             },
             "required": ["shipment_id"],
@@ -39,7 +41,10 @@ def check_shipment_status(shipment_id: str) -> str:
     shipment = SHIPMENTS.get(shipment_id)
     if shipment is None:
         return f"No shipment found with ID {shipment_id}"
-    return f"Shipment {shipment_id} via {shipment['carrier']}: {shipment['status']}"
+    return (
+        f"Shipment {shipment_id} via {shipment['carrier']}: "
+        f"{shipment['status']}"
+    )
 
 
 SYSTEM_PROMPT = """
@@ -61,14 +66,28 @@ Respond in this exact format:
 
 
 def parse_response(text: str) -> dict:
-    category_match = re.search(r"<category>(.*?)</category>", text, re.S)
+    category_match = re.search(
+        r"<category>(.*?)</category>", text, re.S
+    )
     reply_match = re.search(r"<reply>(.*?)</reply>", text, re.S)
     internal_match = re.search(r"INTERNAL:\s*(.*)", text, re.S)
 
     return {
-        "category": category_match.group(1).strip() if category_match else "unknown",
-        "reply": reply_match.group(1).strip() if reply_match else text.strip(),
-        "internal_note": internal_match.group(1).strip() if internal_match else None,
+        "category": (
+            category_match.group(1).strip()
+            if category_match
+            else "unknown"
+        ),
+        "reply": (
+            reply_match.group(1).strip()
+            if reply_match
+            else text.strip()
+        ),
+        "internal_note": (
+            internal_match.group(1).strip()
+            if internal_match
+            else None
+        ),
     }
 
 
@@ -81,7 +100,10 @@ def handle_ticket(customer_message: str) -> dict:
     messages = [
         {
             "role": "user",
-            "content": f"<customer_message>{customer_message}</customer_message>",
+            "content": (
+                f"<customer_message>{customer_message}"
+                "</customer_message>"
+            ),
         }
     ]
 
@@ -94,28 +116,31 @@ def handle_ticket(customer_message: str) -> dict:
     )
 
     while response.stop_reason == "tool_use":
-        tool_use_block = next(
-            block for block in response.content if block.type == "tool_use"
-        )
+        tool_results = []
 
-        if tool_use_block.name == "check_shipment_status":
-            result = check_shipment_status(tool_use_block.input["shipment_id"])
-        else:
-            result = f"Unknown tool: {tool_use_block.name}"
+        for block in response.content:
+            if block.type != "tool_use":
+                continue
 
-        messages.append({"role": "assistant", "content": response.content})
+            if block.name == "check_shipment_status":
+                result = check_shipment_status(
+                    block.input["shipment_id"]
+                )
+            else:
+                result = f"Unknown tool: {block.name}"
+
+            tool_results.append(
+                {
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": result,
+                }
+            )
+
         messages.append(
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": tool_use_block.id,
-                        "content": result,
-                    }
-                ],
-            }
+            {"role": "assistant", "content": response.content}
         )
+        messages.append({"role": "user", "content": tool_results})
 
         response = client.messages.create(
             model="claude-sonnet-5-5",
@@ -126,14 +151,21 @@ def handle_ticket(customer_message: str) -> dict:
         )
 
     final_text = next(
-        (block.text for block in response.content if block.type == "text"), ""
+        (
+            block.text
+            for block in response.content
+            if block.type == "text"
+        ),
+        "",
     )
     return parse_response(final_text)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Draft a first reply to a Northbound customer message."
+        description=(
+            "Draft a first reply to a Northbound customer message."
+        ),
     )
     parser.add_argument(
         "message",

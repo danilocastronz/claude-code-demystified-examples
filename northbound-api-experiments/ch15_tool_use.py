@@ -1,5 +1,9 @@
 from dotenv import load_dotenv
+from anthropic import Anthropic
+
 load_dotenv()
+
+client = Anthropic()  # reads ANTHROPIC_API_KEY from the environment
 
 tools = [
     {
@@ -15,7 +19,9 @@ tools = [
             "properties": {
                 "shipment_id": {
                     "type": "string",
-                    "description": "The Northbound shipment ID, e.g. NB-10234",
+                    "description": (
+                        "The Northbound shipment ID, e.g. NB-10234"
+                    ),
                 }
             },
             "required": ["shipment_id"],
@@ -32,12 +38,10 @@ def check_shipment_status(shipment_id: str) -> str:
     shipment = shipments.get(shipment_id)
     if shipment is None:
         return f"No shipment found with ID {shipment_id}"
-    return f"Shipment {shipment_id} via {shipment['carrier']}: {shipment['status']}"
-
-import json
-from anthropic import Anthropic
-
-client = Anthropic()
+    return (
+        f"Shipment {shipment_id} via {shipment['carrier']}: "
+        f"{shipment['status']}"
+    )
 
 messages = [
     {
@@ -57,28 +61,29 @@ response = client.messages.create(
 )
 
 while response.stop_reason == "tool_use":
-    tool_use_block = next(
-        block for block in response.content if block.type == "tool_use"
-    )
+    tool_results = []
 
-    if tool_use_block.name == "check_shipment_status":
-        result = check_shipment_status(tool_use_block.input["shipment_id"])
-    else:
-        result = f"Unknown tool: {tool_use_block.name}"
+    for block in response.content:
+        if block.type != "tool_use":
+            continue
 
-    messages.append({"role": "assistant", "content": response.content})
+        if block.name == "check_shipment_status":
+            result = check_shipment_status(block.input["shipment_id"])
+        else:
+            result = f"Unknown tool: {block.name}"
+
+        tool_results.append(
+            {
+                "type": "tool_result",
+                "tool_use_id": block.id,
+                "content": result,
+            }
+        )
+
     messages.append(
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "tool_result",
-                    "tool_use_id": tool_use_block.id,
-                    "content": result,
-                }
-            ],
-        }
+        {"role": "assistant", "content": response.content}
     )
+    messages.append({"role": "user", "content": tool_results})
 
     response = client.messages.create(
         model="claude-sonnet-5-5",

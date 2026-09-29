@@ -1,8 +1,9 @@
 ---
 name: add-carrier-integration
-description: Scaffolds a new carrier integration module for Northbound,
-  following the project's conventions. Use when the user asks to add
-  support for a new shipping carrier, or add a new carrier integration.
+description: Scaffolds a new carrier integration module for
+  Northbound, following the project's conventions. Use when the user
+  asks to add support for a new shipping carrier, or add a new
+  carrier integration.
 ---
 
 # Add a Carrier Integration
